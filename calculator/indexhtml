@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculte - آلة حاسبة ذكية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --accent: #667eea;
+            --accent-hover: #5a67d8;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --display-bg: #edf2f7;
+            --btn-number: #e2e8f0;
+            --btn-operator: #667eea;
+            --btn-operator-text: #ffffff;
+            --btn-action: #ed8936;
+            --btn-equal: #48bb78;
+            --history-bg: #f7fafc;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --text-primary: #f7fafc;
+            --text-secondary: #a0aec0;
+            --accent: #9f7aea;
+            --accent-hover: #805ad5;
+            --border: #4a5568;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --display-bg: #2d3748;
+            --btn-number: #4a5568;
+            --btn-operator: #9f7aea;
+            --btn-operator-text: #ffffff;
+            --btn-action: #ed8936;
+            --btn-equal: #48bb78;
+            --history-bg: #2d3748;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 900px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .calculator-wrapper {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 20px 40px var(--shadow);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo::before {
+            content: "🧮";
+            font-size: 28px;
+        }
+
+        .theme-toggle {
+            background: var(--display-bg);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: var(--accent);
+            color: white;
+        }
+
+        .display {
+            background: var(--display-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .previous-operand {
+            color: var(--text-secondary);
+            font-size: 16px;
+            min-height: 24px;
+            word-break: break-all;
+        }
+
+        .current-operand {
+            color: var(--text-primary);
+            font-size: 36px;
+            font-weight: bold;
+            word-break: break-all;
+            margin-top: 5px;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-number {
+            background: var(--btn-number);
+            color: var(--text-primary);
+        }
+
+        .btn-operator {
+            background: var(--btn-operator);
+            color: var(--btn-operator-text);
+        }
+
+        .btn-action {
+            background: var(--btn-action);
+            color: white;
+        }
+
+        .btn-equal {
+            background: var(--btn-equal);
+            color: white;
+            grid-column: span 2;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+
+        .history-panel {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 20px 40px var(--shadow);
+            width: 100%;
+            max-width: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .history-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-history {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .clear-history:hover {
+            background: var(--display-bg);
+            color: var(--accent);
+        }
+
+        .history-item {
+            background: var(--history-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-right: 4px solid var(--accent);
+        }
+
+        .history-item:hover {
+            transform: translateX(-5px);
+            background: var(--display-bg);
+        }
+
+        .history-expression {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .history-result {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .history-panel {
+                max-width: 400px;
+                max-height: 300px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .history-item {
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calculator-wrapper">
+            <div class="header">
+                <div class="logo">Calculte</div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع">🌙</button>
+            </div>
+            
+            <div class="display">
+                <div class="previous-operand" id="previousOperand"></div>
+                <div class="current-operand" id="currentOperand">0</div>
+            </div>
+            
+            <div class="buttons-grid">
+                <button class="btn-action" onclick="clearAll()">AC</button>
+                <button class="btn-action" onclick="deleteLast()">⌫</button>
+                <button class="btn-operator" onclick="appendOperator('%')">%</button>
+                <button class="btn-operator" onclick="appendOperator('÷')">÷</button>
+                
+                <button class="btn-number" onclick="appendNumber('7')">7</button>
+                <button class="btn-number" onclick="appendNumber('8')">8</button>
+                <button class="btn-number" onclick="appendNumber('9')">9</button>
+                <button class="btn-operator" onclick="appendOperator('×')">×</button>
+                
+                <button class="btn-number" onclick="appendNumber('4')">4</button>
+                <button class="btn-number" onclick="appendNumber('5')">5</button>
+                <button class="btn-number" onclick="appendNumber('6')">6</button>
+                <button class="btn-operator" onclick="appendOperator('-')">−</button>
+                
+                <button class="btn-number" onclick="appendNumber('1')">1</button>
+                <button class="btn-number" onclick="appendNumber('2')">2</button>
+                <button class="btn-number" onclick="appendNumber('3')">3</button>
+                <button class="btn-operator" onclick="appendOperator('+')">+</button>
+                
+                <button class="btn-number btn-zero" onclick="appendNumber('0')">0</button>
+                <button class="btn-number" onclick="appendNumber('.')">.</button>
+                <button class="btn-equal" onclick="calculate()">=</button>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">
+                <div class="history-title">📜 السجل</div>
+                <button class="clear-history" onclick="clearHistory()">مسح الكل</button>
+            </div>
+            <div id="historyList">
+                <div class="empty-history">لا توجد عمليات سابقة</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentOperand = '0';
+        let previousOperand = '';
+        let operation = null;
+        let shouldResetScreen = false;
+        let history = JSON.parse(localStorage.getItem('calcHistory')) || [];
+
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.querySelector('.theme-toggle');
+            icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Calculator Functions
+        function updateDisplay() {
+            document.getElementById('currentOperand').textContent = currentOperand;
+            if (operation != null) {
+                document.getElementById('previousOperand').textContent = 
+                    `${previousOperand} ${operation}`;
+            } else {
+                document.getElementById('previousOperand').textContent = previousOperand;
+            }
+        }
+
+        function appendNumber(number) {
+            if (shouldResetScreen) {
+                currentOperand = '';
+                shouldResetScreen = false;
+            }
+            if (number === '.' && currentOperand.includes('.')) return;
+            if (currentOperand === '0' && number !== '.') {
+                currentOperand = number;
+            } else {
+                currentOperand += number;
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operation !== null) calculate();
+            operation = op;
+            previousOperand = currentOperand;
+            shouldResetScreen = true;
+            updateDisplay();
+        }
+
+        function clearAll() {
+            currentOperand = '0';
+            previousOperand = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            if (currentOperand.length === 1) {
+                currentOperand = '0';
+            } else {
+                currentOperand = currentOperand.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            if (operation === null || shouldResetScreen) return;
+            
+            let computation;
+            const prev = parseFloat(previousOperand);
+            const current = parseFloat(currentOperand);
+            
+            if (isNaN(prev) || isNaN(current)) return;
+            
+            switch (operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '×':
+                    computation = prev * current;
+                    break;
+                case '÷':
+                    if (current === 0) {
+                        alert('لا يمكن القسمة على صفر!');
+                        return;
+                    }
+                    computation = prev / current;
+                    break;
+                case '%':
+                    computation = prev % current;
+                    break;
+                default:
+                    return;
+            }
+            
+            // Add to history
+            addToHistory(`${previousOperand} ${operation} ${currentOperand}`, computation);
+            
+            currentOperand = computation.toString();
+            operation = null;
+            previousOperand = '';
+            shouldResetScreen = true;
+            updateDisplay();
+        }
+
+        // History Functions
+        function addToHistory(expression, result) {
+            const historyItem = {
+                expression: expression,
+                result: result,
+                timestamp: new Date().toLocaleString('ar-SA')
+            };
+            
+            history.unshift(historyItem);
+            if (history.length > 50) history.pop(); // Keep last 50 items
+            
+            localStorage.setItem('calcHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">لا توجد عمليات سابقة</div>';
+                return;
+            }
+            
+            historyList.innerHTML = history.map((item, index) => `
+                <div class="history-item" onclick="loadFromHistory(${index})">
+                    <div class="history-expression">${item.expression} =</div>
+                    <div class="history-result">${item.result}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(index) {
+            const item = history[index];
+            currentOperand = item.result.toString();
+            shouldResetScreen = true;
+            updateDisplay();
+        }
+
+        function clearHistory() {
+            if (confirm('هل أنت متأكد من مسح السجل؟')) {
+                history = [];
+                localStorage.removeItem('calcHistory');
+                renderHistory();
+            }
+        }
+
+        // Keyboard Support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+            if (e.key === '.') appendNumber('.');
+            if (e.key === '=' || e.key === 'Enter') calculate();
+            if (e.key === 'Backspace') deleteLast();
+            if (e.key === 'Escape') clearAll();
+            if (e.key === '+') appendOperator('+');
+            if (e.key === '-') appendOperator('-');
+            if (e.key === '*') appendOperator('×');
+            if (e.key === '/') appendOperator('÷');
+            if (e.key === '%') appendOperator('%');
+        });
+
+        // Initialize
+        initTheme();
+        renderHistory();
+        updateDisplay();
+    </script>
+</body>
+</html>
